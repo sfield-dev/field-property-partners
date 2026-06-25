@@ -3,8 +3,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const SUPABASE_URL = 'https://mtarfkjlskgwaretlysf.supabase.co';
-const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const N8N_WEBHOOK = 'https://n8n.s-field.dev/webhook/investor-lead';
 const WA_DIRECT = 'https://wa.me/447593259196?text=Hi%2C%20I%27m%20interested%20in%20Field%20Property%20Partners';
 
@@ -235,7 +235,7 @@ export default function Home() {
     setError(null);
     const payload = { name: formData.name, email: formData.email, investor_type: investorType, budget_range: budget || 'not_specified', source: 'landing_page', created_at: new Date().toISOString() };
     try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/investor_leads`, {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/investor_profiles`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, Prefer: 'return=minimal' },
         body: JSON.stringify(payload),
