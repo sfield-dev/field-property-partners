@@ -3,6 +3,17 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+function useIsMobile(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= breakpoint);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, [breakpoint]);
+  return isMobile;
+}
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const N8N_WEBHOOK = 'https://n8n.s-field.dev/webhook/investor-lead';
@@ -215,6 +226,7 @@ function StatCell({ val, label, sub, delay }) {
 }
 
 export default function Home() {
+  const isMobile = useIsMobile();
   const [investorType, setInvestorType] = useState(null);
   const [budget, setBudget] = useState(null);
   const [formStep, setFormStep] = useState(1);
@@ -270,7 +282,7 @@ export default function Home() {
     <>
       {/* ANNOUNCEMENT BAR */}
       <div style={{ background: '#1C3A2E', padding: '0.5rem 5vw', display: 'flex', justifyContent: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '0.9rem' : '2rem', flexWrap: 'wrap', justifyContent: 'center' }}>
           {['Now sourcing in M8, M9 & M40', 'Liverpool Waters corridor active', 'Register to access deals'].map((t, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.67rem', fontWeight: 500, letterSpacing: '0.08em', color: 'rgba(247,244,239,0.55)', whiteSpace: 'nowrap' }}>
               {i > 0 && <span style={{ width: '3px', height: '3px', background: '#A0623A', borderRadius: '50%', display: 'block' }} />}
@@ -292,21 +304,21 @@ export default function Home() {
           borderBottom: '1px solid rgba(28,58,46,0.09)',
         }}
       >
-        <div style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.05rem', fontWeight: 600, color: '#1C3A2E' }}>
+        <div style={{ fontFamily: 'Playfair Display, serif', fontSize: isMobile ? '0.92rem' : '1.05rem', fontWeight: 600, color: '#1C3A2E' }}>
           Field Property <span style={{ color: '#A0623A', fontStyle: 'italic' }}>Partners</span>
         </div>
-        <div style={{ display: 'flex', gap: '2.5rem', alignItems: 'center' }}>
-          {[['Markets', '#markets'], ['Regeneration', '#regeneration'], ['Why Source', '#why-source'], ['Process', '#process']].map(([l, h]) => (
+        <div style={{ display: 'flex', gap: isMobile ? '0.9rem' : '2.5rem', alignItems: 'center' }}>
+          {!isMobile && [['Markets', '#markets'], ['Regeneration', '#regeneration'], ['Why Source', '#why-source'], ['Process', '#process']].map(([l, h]) => (
             <a key={l} href={h} style={{ fontSize: '0.7rem', fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(26,26,24,0.48)', textDecoration: 'none' }}>{l}</a>
           ))}
-          <a href="#invest" style={{ padding: '0.62rem 1.4rem', background: '#1C3A2E', color: '#F7F4EF', fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none', borderRadius: '2px' }}>
-            Invest With Us
+          <a href="#invest" style={{ padding: isMobile ? '0.55rem 0.9rem' : '0.62rem 1.4rem', background: '#1C3A2E', color: '#F7F4EF', fontSize: isMobile ? '0.6rem' : '0.68rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none', borderRadius: '2px', whiteSpace: 'nowrap' }}>
+            {isMobile ? 'Invest' : 'Invest With Us'}
           </a>
         </div>
       </motion.nav>
 
       {/* HERO */}
-      <section style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', height: '88vh', overflow: 'hidden' }}>
+      <section style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', height: isMobile ? 'auto' : '88vh', overflow: 'hidden' }}>
         {/* Manchester */}
         <div style={{ position: 'relative', overflow: 'hidden' }}>
           <motion.div
@@ -314,7 +326,7 @@ export default function Home() {
             style={{ position: 'absolute', inset: 0, backgroundImage: `url(${MANCHESTER_IMG})`, backgroundSize: 'cover', backgroundPosition: 'center center' }}
           />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(170deg, rgba(28,58,46,0.55) 0%, rgba(28,58,46,0.7) 50%, rgba(10,10,10,0.88) 100%)' }} />
-          <div style={{ position: 'relative', zIndex: 2, padding: '2.5rem 4vw 3.5rem', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+          <div style={{ position: 'relative', zIndex: 2, padding: isMobile ? '2.2rem 6vw 2.6rem' : '2.5rem 4vw 3.5rem', height: isMobile ? 'auto' : '100%', minHeight: isMobile ? '78vh' : undefined, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
               style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(247,244,239,0.4)', marginBottom: '0.8rem' }}>
               Manchester
@@ -332,7 +344,7 @@ export default function Home() {
               </motion.h1>
             </div>
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.85, duration: 0.7 }}
-              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', background: 'rgba(247,244,239,0.08)', border: '1px solid rgba(247,244,239,0.08)', borderRadius: '2px', overflow: 'hidden', marginBottom: '1.5rem' }}>
+              style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : '1fr 1fr', gap: '1px', background: 'rgba(247,244,239,0.08)', border: '1px solid rgba(247,244,239,0.08)', borderRadius: '2px', overflow: 'hidden', marginBottom: '1.5rem' }}>
               {manchesterStats.map((s, i) => (
                 <div key={i} style={{ padding: '0.9rem 0.9rem', background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(10px)' }}>
                   <div style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.4rem', fontWeight: 600, color: '#F7F4EF', lineHeight: 1 }}>{s.val}</div>
@@ -356,7 +368,7 @@ export default function Home() {
             style={{ position: 'absolute', inset: 0, backgroundImage: `url(${LIVERPOOL_IMG})`, backgroundSize: 'cover', backgroundPosition: 'center center' }}
           />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(170deg, rgba(120,70,30,0.55) 0%, rgba(100,55,20,0.65) 50%, rgba(10,10,10,0.88) 100%)' }} />
-          <div style={{ position: 'relative', zIndex: 2, padding: '2.5rem 4vw 3.5rem', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+          <div style={{ position: 'relative', zIndex: 2, padding: isMobile ? '2.2rem 6vw 2.6rem' : '2.5rem 4vw 3.5rem', height: isMobile ? 'auto' : '100%', minHeight: isMobile ? '78vh' : undefined, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
               style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(247,244,239,0.4)', marginBottom: '0.8rem' }}>
               Liverpool
@@ -411,7 +423,7 @@ export default function Home() {
       </div>
 
       {/* MARKETS */}
-      <section id="markets" style={{ padding: '8rem 5vw', background: '#F7F4EF' }}>
+      <section id="markets" style={{ padding: isMobile ? '4rem 6vw' : '8rem 5vw', background: '#F7F4EF' }}>
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
           {eyebrow('Market Intelligence')}
           {sectionH2(<>Why the North West <em style={{ color: '#A0623A' }}>outperforms.</em></>)}
@@ -420,7 +432,7 @@ export default function Home() {
           </p>
         </motion.div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? '2.5rem' : '2rem', marginBottom: isMobile ? '3rem' : '5rem' }}>
           <motion.div initial={{ opacity: 0, x: -24 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.6rem' }}>
               <div style={{ width: '7px', height: '7px', background: '#1C3A2E', borderRadius: '50%' }} />
@@ -441,7 +453,7 @@ export default function Home() {
           </motion.div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '3rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr', gap: isMobile ? '2.8rem' : '3rem' }}>
           <motion.div initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, delay: 0.1 }}>
             <div style={{ fontSize: '0.63rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(26,26,24,0.38)', marginBottom: '1.3rem' }}>Gross Yield — UK City Comparison</div>
             {yieldData.map((d, i) => <AnimatedBar key={i} city={d.city} val={d.val} max={7.5} color="#A0623A" delay={i * 0.09} label={d.label} />)}
@@ -458,7 +470,7 @@ export default function Home() {
       </section>
 
       {/* REGENERATION */}
-      <section id="regeneration" style={{ padding: '8rem 5vw', background: '#EDE9E1', borderTop: '1px solid rgba(28,58,46,0.08)' }}>
+      <section id="regeneration" style={{ padding: isMobile ? '4rem 6vw' : '8rem 5vw', background: '#EDE9E1', borderTop: '1px solid rgba(28,58,46,0.08)' }}>
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
           {eyebrow('Regeneration Pipeline')}
           {sectionH2(<>The capital being deployed <em style={{ color: '#A0623A' }}>around your investment.</em></>)}
@@ -466,7 +478,7 @@ export default function Home() {
             Regeneration spend is not just a headline figure — it is infrastructure that drives rental demand, reduces vacancy risk, and creates sustained price pressure in surrounding postcodes. When billions are committed to a city, the streets around the development reprice first. Here is what is actively being built.
           </p>
         </motion.div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? '2.5rem' : '2rem' }}>
           {regenPoints.map((city, ci) => (
             <motion.div key={ci} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, delay: ci * 0.1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.2rem' }}>
@@ -493,12 +505,12 @@ export default function Home() {
       </section>
 
       {/* WHY SOURCE */}
-      <section id="why-source" style={{ padding: '8rem 5vw', background: '#F7F4EF', borderTop: '1px solid rgba(28,58,46,0.08)' }}>
+      <section id="why-source" style={{ padding: isMobile ? '4rem 6vw' : '8rem 5vw', background: '#F7F4EF', borderTop: '1px solid rgba(28,58,46,0.08)' }}>
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
           {eyebrow('The Sourcing Advantage')}
           {sectionH2(<>What a sourcing partner <em style={{ color: '#A0623A' }}>actually does.</em></>)}
         </motion.div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', background: 'rgba(28,58,46,0.1)', border: '1px solid rgba(28,58,46,0.1)', borderRadius: '2px', overflow: 'hidden' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1px', background: 'rgba(28,58,46,0.1)', border: '1px solid rgba(28,58,46,0.1)', borderRadius: '2px', overflow: 'hidden' }}>
           {[
             { icon: '◈', title: 'Strong Margin Deals', body: 'Every deal is assessed on margin, not just price. Whether sourced below survey value or through value-add potential, we only present opportunities where the numbers genuinely work.' },
             { icon: '◎', title: 'Due Diligence Done', body: 'Comparables, yield calculations, refurb estimates and legal red flags reviewed before it reaches you. One briefing — not a 40-hour research project.' },
@@ -508,7 +520,7 @@ export default function Home() {
             <motion.div key={i}
               initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.1 }}
               whileHover={{ background: '#EDE9E1' }}
-              style={{ background: '#F7F4EF', padding: '2.6rem 2.4rem', transition: 'background 0.25s', position: 'relative' }}>
+              style={{ background: '#F7F4EF', padding: isMobile ? '2rem 1.6rem' : '2.6rem 2.4rem', transition: 'background 0.25s', position: 'relative' }}>
               <div style={{ fontSize: '1.2rem', color: '#A0623A', marginBottom: '1rem' }}>{c.icon}</div>
               <div style={{ fontFamily: 'Playfair Display, serif', fontSize: '1.35rem', fontWeight: 600, color: '#1C3A2E', marginBottom: '0.65rem' }}>{c.title}</div>
               <p style={{ fontSize: '0.83rem', color: 'rgba(26,26,24,0.52)', lineHeight: 1.75, fontWeight: 300 }}>{c.body}</p>
@@ -518,12 +530,12 @@ export default function Home() {
       </section>
 
       {/* PROCESS */}
-      <section id="process" style={{ padding: '8rem 5vw', background: '#EDE9E1', borderTop: '1px solid rgba(28,58,46,0.08)' }}>
+      <section id="process" style={{ padding: isMobile ? '4rem 6vw' : '8rem 5vw', background: '#EDE9E1', borderTop: '1px solid rgba(28,58,46,0.08)' }}>
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
           {eyebrow('How It Works')}
           {sectionH2(<>Three steps to <em style={{ color: '#A0623A' }}>your next deal.</em></>)}
         </motion.div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3,1fr)', gap: isMobile ? '1.6rem' : '2rem' }}>
           {[
             { n: '01', title: 'Consultation', body: 'Tell us your criteria — budget, target yield, preferred strategy. We align on what a good deal looks like before sourcing begins.' },
             { n: '02', title: 'Deal Presented', body: 'We send a fully underwritten opportunity: comparables, yield, refurb estimate, legal status. Nothing speculative ever reaches you.' },
@@ -542,9 +554,9 @@ export default function Home() {
       </section>
 
       {/* INVEST */}
-      <section id="invest" style={{ padding: '8rem 5vw', background: '#1C3A2E', position: 'relative', overflow: 'hidden' }}>
+      <section id="invest" style={{ padding: isMobile ? '4rem 6vw' : '8rem 5vw', background: '#1C3A2E', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: '-20%', right: '-5%', width: '550px', height: '550px', background: 'radial-gradient(circle, rgba(160,98,58,0.14) 0%, transparent 65%)', pointerEvents: 'none', borderRadius: '50%' }} />
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '7rem', alignItems: 'start', position: 'relative', zIndex: 2 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? '2.5rem' : '7rem', alignItems: 'start', position: 'relative', zIndex: 2 }}>
           <motion.div initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
             <div style={{ fontSize: '0.63rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(247,244,239,0.38)', display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '1.1rem' }}>
               <span style={{ width: '22px', height: '1px', background: '#A0623A', display: 'block' }} />Investor Registration
@@ -563,12 +575,12 @@ export default function Home() {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, delay: 0.2 }}
-            style={{ background: '#F7F4EF', borderRadius: '2px', padding: '2.4rem' }}>
+            style={{ background: '#F7F4EF', borderRadius: '2px', padding: isMobile ? '1.6rem' : '2.4rem' }}>
             <AnimatePresence mode="wait">
               {formStep === 1 && (
                 <motion.div key="s1" initial={{ opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -18 }} transition={{ duration: 0.28 }}>
                   <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(26,26,24,0.36)', marginBottom: '1.2rem' }}>Step 1 of 2 — Your investor profile</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.55rem', marginBottom: '1.2rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '0.55rem', marginBottom: '1.2rem' }}>
                     {investorTypes.map(t => (
                       <button key={t.id} onClick={() => setInvestorType(t.id)}
                         style={{ padding: '1rem', background: investorType === t.id ? 'rgba(28,58,46,0.06)' : 'transparent', border: `1px solid ${investorType === t.id ? '#1C3A2E' : 'rgba(28,58,46,0.12)'}`, borderRadius: '2px', cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s' }}>
@@ -629,7 +641,7 @@ export default function Home() {
       </section>
 
       {/* FOOTER */}
-      <footer style={{ padding: '2.5rem 5vw', borderTop: '1px solid rgba(28,58,46,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', background: '#F7F4EF' }}>
+      <footer style={{ padding: '2.5rem 5vw', borderTop: '1px solid rgba(28,58,46,0.1)', display: 'flex', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', background: '#F7F4EF', textAlign: 'center' }}>
         <div style={{ fontFamily: 'Playfair Display, serif', fontSize: '1rem', fontWeight: 600, color: '#1C3A2E' }}>Field Property <span style={{ color: '#A0623A', fontStyle: 'italic' }}>Partners</span></div>
         <div style={{ fontSize: '0.67rem', color: 'rgba(26,26,24,0.3)', letterSpacing: '0.06em' }}>Manchester & Liverpool · Property Sourcing · 2025</div>
         <div style={{ display: 'flex', gap: '2rem' }}>
