@@ -155,8 +155,20 @@ function LineGraph({ data }) {
   const livPath = data.map((d, i) => `${i === 0 ? 'M' : 'L'} ${xScale(i)} ${yScale(d.liverpool)}`).join(' ');
   const splitIdx = data.findIndex(d => d.year.includes('e'));
 
+  const [animated, setAnimated] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setAnimated(true); observer.disconnect(); } },
+      { threshold: 0.1 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div>
+    <div ref={ref}>
       <svg viewBox={`0 0 ${w} ${h}`} style={{ width: '100%', height: 'auto', overflow: 'visible' }}>
         {splitIdx > 0 && (
           <rect x={xScale(splitIdx)} y={padT} width={xScale(data.length - 1) - xScale(splitIdx)} height={h - padT - padB} fill="rgba(28,58,46,0.03)" />
@@ -176,21 +188,31 @@ function LineGraph({ data }) {
         {[minV + 10, minV + (maxV - minV) / 2, maxV - 10].map((v, i) => (
           <text key={i} x={padL - 4} y={yScale(v) + 3} textAnchor="end" fontSize="8" fill="rgba(26,26,24,0.35)" fontFamily="Outfit, sans-serif">£{v}k</text>
         ))}
-        <motion.path d={manchPath} fill="none" stroke="#1C3A2E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-          initial={{ pathLength: 0, opacity: 0 }} whileInView={{ pathLength: 1, opacity: 1 }} viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: 2, ease: 'easeInOut' }} />
-        <motion.path d={livPath} fill="none" stroke="#A0623A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-          initial={{ pathLength: 0, opacity: 0 }} whileInView={{ pathLength: 1, opacity: 1 }} viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: 2, delay: 0.25, ease: 'easeInOut' }} />
+        <path d={manchPath} fill="none" stroke="#1C3A2E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+          pathLength="1"
+          style={{
+            strokeDasharray: 1, strokeDashoffset: animated ? 0 : 1,
+            transition: 'stroke-dashoffset 2s ease-in-out', opacity: animated ? 1 : 0,
+          }} />
+        <path d={livPath} fill="none" stroke="#A0623A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+          pathLength="1"
+          style={{
+            strokeDasharray: 1, strokeDashoffset: animated ? 0 : 1,
+            transition: 'stroke-dashoffset 2s ease-in-out 0.25s', opacity: animated ? 1 : 0,
+          }} />
         {data.map((d, i) => (
-          <motion.circle key={`m${i}`} cx={xScale(i)} cy={yScale(d.manchester)} r="3" fill="#1C3A2E"
-            initial={{ scale: 0, opacity: 0 }} whileInView={{ scale: 1, opacity: 1 }} viewport={{ once: true }}
-            transition={{ duration: 0.3, delay: 1.8 + i * 0.04 }} />
+          <circle key={`m${i}`} cx={xScale(i)} cy={yScale(d.manchester)} r="3" fill="#1C3A2E"
+            style={{
+              opacity: animated ? 1 : 0, transform: animated ? 'scale(1)' : 'scale(0)', transformOrigin: `${xScale(i)}px ${yScale(d.manchester)}px`,
+              transition: `opacity 0.3s ease ${1.8 + i * 0.04}s, transform 0.3s ease ${1.8 + i * 0.04}s`,
+            }} />
         ))}
         {data.map((d, i) => (
-          <motion.circle key={`l${i}`} cx={xScale(i)} cy={yScale(d.liverpool)} r="3" fill="#A0623A"
-            initial={{ scale: 0, opacity: 0 }} whileInView={{ scale: 1, opacity: 1 }} viewport={{ once: true }}
-            transition={{ duration: 0.3, delay: 2.0 + i * 0.04 }} />
+          <circle key={`l${i}`} cx={xScale(i)} cy={yScale(d.liverpool)} r="3" fill="#A0623A"
+            style={{
+              opacity: animated ? 1 : 0, transform: animated ? 'scale(1)' : 'scale(0)', transformOrigin: `${xScale(i)}px ${yScale(d.liverpool)}px`,
+              transition: `opacity 0.3s ease ${2.0 + i * 0.04}s, transform 0.3s ease ${2.0 + i * 0.04}s`,
+            }} />
         ))}
         <text x={xScale(data.length - 1) + 5} y={yScale(data[data.length - 1].manchester) + 3} fontSize="9" fill="#1C3A2E" fontFamily="Playfair Display, serif" fontWeight="600">£{data[data.length - 1].manchester}k</text>
         <text x={xScale(data.length - 1) + 5} y={yScale(data[data.length - 1].liverpool) + 3} fontSize="9" fill="#A0623A" fontFamily="Playfair Display, serif" fontWeight="600">£{data[data.length - 1].liverpool}k</text>
